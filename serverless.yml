@@ -30,4 +30,9 @@ stepFunctions:
                         Type: Task
                         Resource:
                             Fn::GetAtt: [double, Arn]
+                        Retry:
+                            - ErrorEquals: [NumberIsTooBig]
+                              MaxAttempts: 0
+                            - ErrorEquals: [States.ALL]
+                              MaxAttempts: 3
                         End: true
