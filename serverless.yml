@@ -1,0 +1,38 @@
+service: aws-nodejs
+
+plugins:
+    - serverless-step-functions
+
+provider:
+    name: aws
+    runtime: nodejs10.x
+
+functions:
+    add:
+        handler: handler.add
+    double:
+        handler: handler.double
+
+stepFunctions:
+    stateMachines:
+        simple-maths:
+            name: simple-maths
+            definition:
+                Comment: math example
+                StartAt: Add
+                States:
+                    Add:
+                        Type: Task
+                        Resource:
+                            Fn::GetAtt: [add, Arn]
+                        Next: Double
+                    Double:
+                        Type: Task
+                        Resource:
+                            Fn::GetAtt: [double, Arn]
+                        Retry:
+                            - ErrorEquals: [NumberIsTooBig]
+                              MaxAttempts: 0
+                            - ErrorEquals: [States.ALL]
+                              MaxAttempts: 3
+                        End: true
